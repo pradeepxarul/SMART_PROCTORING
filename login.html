@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Interview Login – Identity Verification</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    html,body{width:100%;height:100%;font-family:'Inter',sans-serif;background:#0f172a;overflow-x:hidden}
+    body{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px;
+      background:radial-gradient(ellipse at 30% 20%,#1e3a5f 0%,#0f172a 70%)}
+    .glass{background:rgba(255,255,255,0.06);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+      border:1px solid rgba(255,255,255,0.1);border-radius:24px;box-shadow:0 8px 64px rgba(0,0,0,0.4)}
+    .container{max-width:460px;width:100%;padding:36px 32px;text-align:center}
+    .logo{width:52px;height:52px;margin:0 auto 18px;background:linear-gradient(135deg,#6366f1,#8b5cf6);
+      border-radius:14px;display:flex;align-items:center;justify-content:center}
+    .logo svg{width:28px;height:28px;color:#fff}
+    h1{color:#f1f5f9;font-size:1.6rem;font-weight:700;margin-bottom:6px}
+    .sub{color:#94a3b8;font-size:0.95rem;margin-bottom:24px}
+    .cam-box{position:relative;width:100%;aspect-ratio:4/3;border-radius:16px;overflow:hidden;
+      background:#1e293b;border:2px dashed rgba(99,102,241,0.4);margin-bottom:18px}
+    .cam-placeholder{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;
+      justify-content:center;color:#64748b;z-index:2}
+    .cam-placeholder svg{width:36px;height:36px;margin-bottom:10px;opacity:0.5}
+    video,#capturedImage{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:14px;transform:scaleX(-1)}
+    #capturedImage{display:none}
+    .btn{display:inline-flex;align-items:center;gap:8px;padding:12px 28px;border:none;border-radius:12px;
+      font-size:1rem;font-weight:600;cursor:pointer;transition:all .25s ease;font-family:inherit}
+    .btn-primary{background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff}
+    .btn-primary:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(99,102,241,0.4)}
+    .btn-primary:disabled{opacity:0.4;cursor:not-allowed;transform:none;box-shadow:none}
+    .btn-success{background:linear-gradient(135deg,#10b981,#059669);color:#fff}
+    .btn-success:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(16,185,129,0.4)}
+    .btn-warn{background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff}
+    .btn-warn:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(245,158,11,0.3)}
+    .alert{padding:12px 18px;border-radius:12px;font-weight:500;font-size:0.9rem;margin-bottom:14px;display:none}
+    .alert-info{background:rgba(99,102,241,0.15);color:#a5b4fc;border:1px solid rgba(99,102,241,0.25)}
+    .alert-ok{background:rgba(16,185,129,0.15);color:#6ee7b7;border:1px solid rgba(16,185,129,0.25)}
+    .alert-err{background:rgba(239,68,68,0.15);color:#fca5a5;border:1px solid rgba(239,68,68,0.25)}
+    .welcome{background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.2);border-radius:14px;
+      padding:14px;margin-bottom:14px;display:none}
+    .welcome h3{color:#6ee7b7;font-size:1.05rem;margin-bottom:4px}
+    .welcome p{color:#a7f3d0;font-size:0.9rem}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+    .pulse{animation:pulse 1.4s infinite}
+    /* Progress dots for multi-shot enrollment */
+    .enroll-progress{display:flex;gap:10px;justify-content:center;margin:14px 0}
+    .enroll-dot{width:14px;height:14px;border-radius:50%;background:rgba(255,255,255,0.1);
+      border:2px solid rgba(255,255,255,0.2);transition:all .3s}
+    .enroll-dot.done{background:#10b981;border-color:#10b981}
+    .enroll-dot.active{border-color:#6366f1;animation:pulse 1.2s infinite}
+    .enroll-label{color:#94a3b8;font-size:0.8rem;margin-bottom:4px}
+  </style>
+</head>
+<body>
+  <div class="container glass">
+    <div class="logo"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg></div>
+    <h1>Interview Login</h1>
+    <p class="sub">Verify your identity to start the session</p>
+
+    <div class="cam-box">
+      <div class="cam-placeholder" id="ph"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg><span>Click "Start Camera" to begin</span></div>
+      <video id="webcam" autoplay playsinline></video>
+      <img id="capturedImage"/>
+    </div>
+
+    <!-- Multi-shot enrollment progress -->
+    <div class="enroll-label" id="enrollLabel" style="display:none">Face Capture Progress (3 angles for best accuracy)</div>
+    <div class="enroll-progress" id="enrollProgress" style="display:none">
+      <div class="enroll-dot" id="dot0"></div>
+      <div class="enroll-dot" id="dot1"></div>
+      <div class="enroll-dot" id="dot2"></div>
+    </div>
+
+    <button class="btn btn-primary" id="startBtn">Start Camera</button>
+    <button class="btn btn-primary" id="captureBtn" style="display:none">Capture Face (1/3)</button>
+    <button class="btn btn-warn" id="retryBtn" style="display:none">Try Again</button>
+
+    <div class="alert" id="alert"></div>
+    <div class="welcome" id="welcome"><h3 id="wName"></h3><p id="wMsg"></p></div>
+    <button class="btn btn-success" id="startInterview" style="display:none">Start Interview</button>
+  </div>
+
+  <script>
+    const video=document.getElementById('webcam'),startBtn=document.getElementById('startBtn'),
+      captureBtn=document.getElementById('captureBtn'),retryBtn=document.getElementById('retryBtn'),
+      startInterview=document.getElementById('startInterview'),alertEl=document.getElementById('alert'),
+      welcome=document.getElementById('welcome'),wName=document.getElementById('wName'),
+      wMsg=document.getElementById('wMsg'),ph=document.getElementById('ph'),
+      capImg=document.getElementById('capturedImage'),
+      enrollLabel=document.getElementById('enrollLabel'),
+      enrollProgress=document.getElementById('enrollProgress');
+    let streaming=false, verified=null, enrollCount=0;
+    const TOTAL_ENROLLMENTS = 3;
+    const CAPTURE_PROMPTS = [
+      "Look straight at the camera",
+      "Turn your head slightly left",
+      "Turn your head slightly right"
+    ];
+
+    function showAlert(msg,type){alertEl.textContent=msg;alertEl.className=`alert alert-${type}`;alertEl.style.display='block'}
+    function hideAlert(){alertEl.style.display='none'}
+    function updateDots(){
+      for(let i=0;i<TOTAL_ENROLLMENTS;i++){
+        const d=document.getElementById('dot'+i);
+        d.className='enroll-dot'+(i<enrollCount?' done':'')+(i===enrollCount?' active':'');
+      }
+    }
+    function reset(){startBtn.style.display='inline-flex';captureBtn.style.display='none';retryBtn.style.display='none';
+      startInterview.style.display='none';hideAlert();welcome.style.display='none';
+      enrollLabel.style.display='none';enrollProgress.style.display='none';enrollCount=0}
+
+    startBtn.onclick=async()=>{
+      try{showAlert('Accessing camera...','info');
+        const s=await navigator.mediaDevices.getUserMedia({video:{width:{ideal:640},height:{ideal:480}}});
+        video.srcObject=s;video.onloadedmetadata=()=>{ph.style.display='none';video.style.display='block';
+        capImg.style.display='none';video.play();streaming=true;hideAlert();
+        startBtn.style.display='none';captureBtn.style.display='inline-flex';
+        enrollLabel.style.display='block';enrollProgress.style.display='flex';
+        updateDots();
+        showAlert(CAPTURE_PROMPTS[0],'info');
+        captureBtn.textContent=`Capture Face (1/${TOTAL_ENROLLMENTS})`;
+      }; }catch(e){showAlert('Camera error: '+e.message,'err');retryBtn.style.display='inline-flex'}
+    };
+
+    captureBtn.onclick=async()=>{
+      if(!streaming)return;
+      captureBtn.disabled=true;
+      showAlert(`Capturing face ${enrollCount+1}/${TOTAL_ENROLLMENTS}...`,'info');
+
+      try{
+        const c=document.createElement('canvas');c.width=video.videoWidth;c.height=video.videoHeight;
+        c.getContext('2d').drawImage(video,0,0);
+        const blob=await new Promise(r=>c.toBlob(r,'image/jpeg',0.9));
+
+        const fd=new FormData();
+        fd.append('image',blob,'face.jpg');
+        fd.append('user_id','Candidate');
+        fd.append('append', enrollCount > 0 ? 'true' : 'false');
+
+        const res=await fetch('/enroll',{method:'POST',body:fd});
+        const data=await res.json();
+
+        if(data.success){
+          enrollCount++;
+          updateDots();
+
+          if(enrollCount >= TOTAL_ENROLLMENTS){
+            // All captures done!
+            verified='Candidate';
+            // Show final captured image
+            const dataUrl=c.toDataURL('image/jpeg',0.9);
+            if(video.srcObject){video.srcObject.getTracks().forEach(t=>t.stop());video.srcObject=null}
+            video.style.display='none';capImg.src=dataUrl;capImg.style.display='block';streaming=false;
+
+            showAlert(`Identity verified with ${enrollCount} captures!`,'ok');
+            wName.textContent='Welcome, Candidate!';
+            wMsg.textContent='Identity verified from multiple angles. You may now proceed.';
+            welcome.style.display='block';captureBtn.style.display='none';
+            startInterview.style.display='inline-flex';
+          } else {
+            // More captures needed
+            showAlert(`✓ Capture ${enrollCount} saved. Now: ${CAPTURE_PROMPTS[enrollCount]}`,'ok');
+            captureBtn.textContent=`Capture Face (${enrollCount+1}/${TOTAL_ENROLLMENTS})`;
+          }
+        } else {
+          showAlert(data.error||'Capture failed. Try again.','err');
+        }
+      }catch(e){showAlert('Error: '+e.message,'err')}
+      finally{captureBtn.disabled=false}
+    };
+
+    retryBtn.onclick=()=>{reset();if(video.srcObject){video.srcObject.getTracks().forEach(t=>t.stop());
+      video.srcObject=null}ph.style.display='flex';video.style.display='block';capImg.style.display='none';
+      streaming=false;verified=null;enrollCount=0};
+
+    startInterview.onclick=()=>{if(verified){sessionStorage.setItem('verifiedUser',verified);
+      window.location.href='webcam.html'}};
+    reset();
+  </script>
+</body>
+</html>

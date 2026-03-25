@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Session Terminated</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    html,body{width:100%;height:100%;font-family:'Inter',sans-serif;
+      background:radial-gradient(ellipse at 50% 30%,#3b1414,#0f172a 70%);
+      display:flex;align-items:center;justify-content:center}
+    .card{background:rgba(255,255,255,0.05);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+      border:1px solid rgba(239,68,68,0.2);border-radius:24px;padding:40px 36px;
+      text-align:center;max-width:500px;width:90vw;box-shadow:0 8px 64px rgba(0,0,0,0.5);
+      animation:shake .4s ease}
+    .icon{width:64px;height:64px;margin:0 auto 18px;background:rgba(239,68,68,0.15);
+      border-radius:50%;display:flex;align-items:center;justify-content:center;
+      border:2px solid rgba(239,68,68,0.3)}
+    .icon svg{width:32px;height:32px;color:#f87171}
+    h1{color:#fca5a5;font-size:1.6rem;font-weight:700;margin-bottom:8px}
+    .sub{color:#f87171;font-size:0.95rem;font-weight:500;margin-bottom:20px}
+    .msg{background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);border-radius:14px;
+      padding:16px;color:#fca5a5;font-size:0.92rem;line-height:1.5;margin-bottom:20px}
+    .details{background:rgba(255,255,255,0.04);border-radius:14px;padding:16px;text-align:left;margin-bottom:20px}
+    .details p{color:#94a3b8;font-size:0.85rem;margin:4px 0}
+    .details strong{color:#cbd5e1}
+    .btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+    .btn{padding:12px 24px;border:none;border-radius:12px;font-size:0.95rem;font-weight:600;
+      cursor:pointer;font-family:inherit;transition:all .25s}
+    .btn-primary{background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff}
+    .btn-primary:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(239,68,68,0.4)}
+    .btn-secondary{background:rgba(255,255,255,0.08);color:#cbd5e1;border:1px solid rgba(255,255,255,0.1)}
+    .btn-secondary:hover{background:rgba(255,255,255,0.12)}
+    @keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="icon"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"/></svg></div>
+    <h1>Session Terminated</h1>
+    <p class="sub">Integrity Violation Detected</p>
+    <div class="msg"><strong>Access Denied:</strong> Your interview session was terminated due to a proctoring integrity violation. This incident has been logged.</div>
+    <div class="details">
+      <p><strong>Time:</strong> <span id="t"></span></p>
+      <p><strong>Session:</strong> <span id="s"></span></p>
+      <p><strong>Candidate:</strong> <span id="u"></span></p>
+    </div>
+    <div class="btns">
+      <button class="btn btn-primary" onclick="sessionStorage.clear();window.location.href='login.html'">Return to Login</button>
+      <button class="btn btn-secondary">Contact Support</button>
+    </div>
+  </div>
+  <script>
+    document.getElementById('t').textContent=new Date().toLocaleString();
+    document.getElementById('s').textContent=Math.random().toString(36).substr(2,9).toUpperCase();
+    document.getElementById('u').textContent=sessionStorage.getItem('verifiedUser')||'Unknown';
+    window.history.pushState(null,null,window.location.href);
+    window.onpopstate=()=>window.history.pushState(null,null,window.location.href);
+  </script>
+</body>
+</html>
