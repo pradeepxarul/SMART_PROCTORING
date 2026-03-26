@@ -4,10 +4,10 @@ echo   Interview Proctoring Service
 echo ============================================
 echo.
 
-:: Activate virtual environment
-if exist "venv_311\Scripts\activate.bat" (
-    call venv_311\Scripts\activate.bat
-) else (
+:: Use venv python directly
+set "VENV_PY=venv_311\Scripts\python.exe"
+
+if not exist "%VENV_PY%" (
     echo [!] Virtual environment not found. Run setup.bat first.
     pause
     exit /b 1
@@ -16,5 +16,5 @@ if exist "venv_311\Scripts\activate.bat" (
 echo Starting server on http://localhost:5000 ...
 echo Press Ctrl+C to stop.
 echo.
-python server.py
+%VENV_PY% server.py
 pause
